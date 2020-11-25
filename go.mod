@@ -7,6 +7,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect

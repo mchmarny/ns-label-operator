@@ -42,5 +42,5 @@ func nsChangeHandler(oldObj interface{}, newObj interface{}) {
 		return
 	}
 
-	log.Infof("triggering (%s) on ns: %s (labels: %v)\n", triggerLabel, newNs.GetName(), newNs.GetLabels())
+	log.Infof("triggering (%s) on ns: %s (labels: %v)", triggerLabel, newNs.GetName(), newNs.GetLabels())
 }

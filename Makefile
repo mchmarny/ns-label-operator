@@ -1,4 +1,4 @@
-APP_VERSION ?=v0.1.1
+APP_VERSION ?=v0.1.3
 APP_ID      ?=ns-label-trigger
 IMAGE_OWNER ?=$(shell git config --get user.username)
 
@@ -16,20 +16,25 @@ test: tidy ## Tests the entire project
 
 .PHONY: run
 run: tidy ## Runs uncompiled code
-	DEBUG=true go run *.go
+	KUBECONFIG=~/.kube/config DEBUG=true go run *.go
 
 .PHONY: image
 image: tidy ## Builds and publish image 
-	docker build \
-		--build-arg APP_VERSION=$(APP_VERSION) \
-		--build-arg BUILD_TIME=$(shell date -u +"%Y-%m-%dT%T-UTC") \
-		-t ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION) \
-		.
+	docker build -t ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION) .
 	docker push ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION)
 
 .PHONY: lint
 lint: ## Lints the entire project 
 	golangci-lint run --timeout=3m
+
+.PHONY: deploy
+deploy: ## Deploys pre-build image to k8s
+	kubectl apply -f deployment.yaml
+
+.PHONY: spell 
+spell: ## Checks spelling across the entire project 
+	# go get github.com/client9/misspell/cmd/misspell
+	misspell -locale="US" -error -source="text" *.go
 
 tag: ## Creates release tag 
 	git tag $(APP_VERSION)

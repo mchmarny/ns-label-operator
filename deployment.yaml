@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-watcher
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ns-watcher-account
+  namespace: ns-watcher
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ns-reader-role
+  namespace: ns-watcher
+rules:
+- apiGroups: ["*"]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ns-reader-cluster-binding
+subjects:
+- kind: ServiceAccount
+  name: ns-watcher-account
+  namespace: ns-watcher
+roleRef:
+  kind: ClusterRole
+  name: ns-reader-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ns-label-trigger
+  namespace: ns-watcher
+  labels:
+    app: ns-label-trigger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ns-label-trigger
+  template:
+    metadata:
+      labels:
+        app: ns-label-trigger
+    spec:
+      restartPolicy: Always
+      serviceAccountName: ns-watcher-account
+      containers:
+      - name: watch
+        image: ghcr.io/mchmarny/ns-label-trigger:v0.1.2
+        env:
+        - name: TRIGGER
+          value: "dapr-enabled"
+        - name: DEBUG
+          value: "true"
+        - name: LOGJSON
+          value: "true"
+      
+
