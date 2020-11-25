@@ -1,6 +1,6 @@
 # ns-label-trigger
 
-WIP: kubernetes namespace watch with label trigger
+Watches kubernetes namespaces and fires a trigger when specific label is set to true.
 
 ## deployment 
 
