@@ -2,6 +2,14 @@
 
 Watches kubernetes namespaces and fires a trigger when specific label is set to true.
 
+## config 
+
+Create a config map with the content you want to execute when namespace is labeled:
+
+```shell
+kubectl create cm trigger-config --from-file test.yaml -n ns-watcher
+```
+
 ## deployment 
 
 Apply the deployment that will create:
@@ -35,6 +43,7 @@ Now, follow `ns-label-trigger` logs:
 kubectl logs -f -l app=ns-label-trigger -n ns-watcher
 ```
 
+
 ## test
 
 > Assumes namespace named `test1` and the label to trigger on when `true` is `dapr-enabled`
@@ -61,7 +70,15 @@ The log you followed in the deployment should now include:
 }
 ```
 
-You can now delete the test namespace:
+To remove the label:
+
+> note, removing trigger label just prevents the trigger from firming again on that namespace, it does not undo the already created resources
+
+```shell
+kubectl label ns test1 dapr-enabled-
+```
+
+To clean up, just delete the namespace:
 
 ```shell
 kubectl delete ns test1

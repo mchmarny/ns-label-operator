@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
 	"os"
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/informers"
@@ -24,6 +25,9 @@ var (
 	triggerLabel = getEnvVar("TRIGGER", "dapr-enabled")
 	debug        = getEnvVar("DEBUG", "") == "true"
 	logJSON      = getEnvVar("LOGJSON", "") == "true"
+
+	logger  = logrus.New()
+	trigger *triggerCmd
 )
 
 func getConfig(file string) (conf *rest.Config, err error) {
@@ -42,16 +46,16 @@ func getConfig(file string) (conf *rest.Config, err error) {
 }
 
 func main() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.WarnLevel)
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.WarnLevel)
 	if debug {
-		log.SetLevel(log.TraceLevel)
+		logger.SetLevel(logrus.TraceLevel)
 	}
 	if logJSON {
-		log.SetFormatter(&log.JSONFormatter{})
+		logger.SetFormatter(&logrus.JSONFormatter{})
 	}
 
-	log.Infof("loading configuration... (KUBECONFIG=%s)", configPath)
+	logger.Infof("loading configuration... (KUBECONFIG=%s)", configPath)
 	config, err := getConfig(configPath)
 	if err != nil {
 		log.Fatalf("error loading config: %v", err)
@@ -60,6 +64,11 @@ func main() {
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("error getting client: %v", err)
+	}
+
+	trigger = &triggerCmd{
+		clientSet: clientset,
+		logger:    logger,
 	}
 
 	factory := informers.NewSharedInformerFactory(clientset, 0) // 0 == don't sync

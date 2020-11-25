@@ -1,6 +1,8 @@
-APP_VERSION ?=v0.1.3
-APP_ID      ?=ns-label-trigger
-IMAGE_OWNER ?=$(shell git config --get user.username)
+APP_VERSION  ?=v0.1.3
+APP_ID       ?=ns-label-trigger
+IMAGE_OWNER  ?=$(shell git config --get user.username)
+YAML_FILE    :=test.yaml
+YAML      :=$(shell cat ${YAML_FILE})
 
 .PHONY: all
 all: help
@@ -16,7 +18,7 @@ test: tidy ## Tests the entire project
 
 .PHONY: run
 run: tidy ## Runs uncompiled code
-	KUBECONFIG=~/.kube/config DEBUG=true go run *.go
+	KUBECONFIG=~/.kube/config DEBUG=true YAML="${YAML}" go run *.go
 
 .PHONY: image
 image: tidy ## Builds and publish image 

@@ -61,5 +61,12 @@ spec:
           value: "true"
         - name: LOGJSON
           value: "true"
+        volumeMounts:
+        - name: "config"
+          mountPath: "/config.yaml"
+      volumes:
+        - name: "config"
+          configMap:
+            name: "trigger-config"
       
 
