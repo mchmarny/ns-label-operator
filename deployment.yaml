@@ -48,7 +48,7 @@ spec:
       serviceAccountName: ns-watcher-account
       containers:
       - name: watch
-        image: ghcr.io/mchmarny/ns-label-operator:v0.2.1
+        image: ghcr.io/mchmarny/ns-label-operator:v0.2.5
         env:
         - name: TRIGGER_LABEL
           value: "dapr-enabled"
@@ -58,7 +58,7 @@ spec:
           value: "true"
         volumeMounts:
         - name: "config"
-          mountPath: "/config.yaml"
+          mountPath: "/config"
       volumes:
         - name: "config"
           configMap:

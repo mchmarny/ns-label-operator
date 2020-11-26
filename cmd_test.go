@@ -31,7 +31,7 @@ func TestCmd(t *testing.T) {
 		logger: getLogger(true, true),
 	}
 
-	if err := trigger.init("test.yaml"); err != nil {
+	if err := trigger.init("./manifests"); err != nil {
 		t.Fatalf("error on init: %v", err)
 	}
 }

@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	triggerValue    = "true"
-	yamlPathDefault = "/config.yaml"
+	triggerValue     = "true"
+	configDirDefault = "/config"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 	triggerLabel = getEnvVar("TRIGGER_LABEL", "dapr-enabled")
 	debug        = getEnvVar("DEBUG", "") == "true"
 	logJSON      = getEnvVar("LOG_TO_JSON", "") == "true"
-	yamlPath     = getEnvVar("YAML_PATH", yamlPathDefault)
+	dirPath      = getEnvVar("CONFIG_DIR", configDirDefault)
 	fileManager  = getEnvVar("FILE_MANAGER", "ns-label-operator")
 
 	logger  = getLogger(debug, logJSON)
@@ -80,7 +80,7 @@ func main() {
 		fileManager: fileManager,
 	}
 
-	if err := trigger.init(yamlPath); err != nil {
+	if err := trigger.init(dirPath); err != nil {
 		log.Fatalf("error initializing cmd: %v", err)
 	}
 

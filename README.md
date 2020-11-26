@@ -4,11 +4,13 @@ Watches kubernetes namespaces and fires a trigger to apply pre-configured yaml t
 
 ## config 
 
-Create the `ns-watcher` namespace and `trigger-config` config map with the content you want to execute when namespace is labeled. That file can include multiple YAML blocks. See [test.yaml](./test.yaml) for example.
+Create the `ns-watcher` namespace and `trigger-config` config map with the content you want to execute when namespace is labeled. That file can include multiple YAML blocks. See [test.yaml](manifests/test.yaml) for example.
+
+> Note, the file you load must have `*.yaml` extension to be read by the operator
 
 ```shell
 kubectl create ns ns-watcher
-kubectl create cm trigger-config --from-file test.yaml -n ns-watcher
+kubectl create cm trigger-config --from-file manifests/test.yaml -n ns-watcher
 ```
 
 ## deployment 
@@ -92,5 +94,6 @@ To delete the entire deployment:
 
 ```shell
 kubectl delete -f deployment.yaml
+kubectl delete cm trigger-config -n ns-watcher
 ```
 

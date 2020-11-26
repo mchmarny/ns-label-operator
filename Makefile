@@ -1,4 +1,4 @@
-APP_VERSION  ?=v0.2.1
+APP_VERSION  ?=v0.2.5
 APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 
@@ -16,7 +16,7 @@ test: tidy ## Tests the entire project
 
 .PHONY: run
 run: tidy ## Runs uncompiled code
-	KUBECONFIG=~/.kube/config DEBUG=true YAML_PATH=test.yaml \
+	KUBECONFIG=~/.kube/config DEBUG=true CONFIG_DIR=manifests \
 		go run cmd.go handler.go main.go
 
 .PHONY: image

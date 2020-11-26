@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
-	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -28,30 +29,31 @@ type triggerCmd struct {
 	cs          *kubernetes.Clientset
 	logger      *logrus.Logger
 	fileManager string
-	yamlFiles   []string
+	manifests   []string
 }
 
-func (r *triggerCmd) init(yamlPath string) error {
-	r.logger.Debugf("file: %s", yamlPath)
+func (r *triggerCmd) init(dir string) error {
+	r.logger.Debugf("config dir: %s", dir)
 
-	info, err := os.Stat(yamlPath)
-	if os.IsNotExist(err) {
-		return errors.Wrapf(err, "yaml file not found: %s", yamlPath)
-	}
-
-	if info.IsDir() {
-		return errors.Wrapf(err, "%s is a directory, expected file", yamlPath)
-	}
-
-	b, err := ioutil.ReadFile(yamlPath)
+	files, err := getFiles(dir, "*.yaml")
 	if err != nil {
-		return errors.Wrapf(err, "error reading file: %s", yamlPath)
+		return errors.Wrapf(err, "error reading files from: %s", dir)
 	}
 
-	r.yamlFiles = make([]string, 0)
-	for _, y := range strings.Split(string(b), "---") {
-		r.yamlFiles = append(r.yamlFiles, y)
+	r.manifests = make([]string, 0)
+
+	for _, f := range files {
+		r.logger.Debugf("parsing %s file", f)
+		b, err := ioutil.ReadFile(f)
+		if err != nil {
+			return errors.Wrapf(err, "error reading manifest: %s", f)
+		}
+		for _, y := range strings.Split(string(b), "---") {
+			r.manifests = append(r.manifests, y)
+		}
 	}
+
+	r.logger.Debugf("found %d YAML manifest(s) from %d file(s)", len(r.manifests), len(files))
 
 	return nil
 }
@@ -60,14 +62,16 @@ func (r *triggerCmd) run(ns *corev1.Namespace) error {
 	if ns == nil {
 		return errors.New("nil namespace")
 	}
-	r.logger.Debugf("ns: %s", ns.Name)
+
+	r.logger.Debugf("running %d files on %s namespace", len(r.manifests), ns.Name)
 
 	ctx := context.Background()
-	for _, y := range r.yamlFiles {
+	for i, y := range r.manifests {
 		if err := r.serverApply(ctx, ns, y); err != nil {
 			r.logger.Errorf("error applying yaml (%s): %v", y, err)
 			continue
 		}
+		r.logger.Debugf("file %d applied successfully", i)
 	}
 	return nil
 }
@@ -136,5 +140,25 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 		return errors.Wrapf(err, "error applying %s to %s", string(data), obj.GetName())
 	}
 
+	r.logger.Infof("object %s applied in %s... ", obj.GetName(), obj.GetNamespace())
+
 	return nil
+}
+
+// k8s configmap includes a subdirectory with a version of each file
+// this lists only the top dir files, no walking down
+func getFiles(dir, pattern string) ([]string, error) {
+	var matches []string
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error reading dir: %s", dir)
+	}
+	for _, f := range files {
+		if matched, err := filepath.Match(pattern, f.Name()); err != nil {
+			return nil, errors.Wrapf(err, "error matching file: %s", f)
+		} else if matched {
+			matches = append(matches, path.Join(dir, f.Name()))
+		}
+	}
+	return matches, nil
 }
