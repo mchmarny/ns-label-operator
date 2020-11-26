@@ -85,22 +85,17 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 	}
 
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-
-	// 1. Prepare a RESTMapper to find GVR
 	dc, err := discovery.NewDiscoveryClientForConfig(r.cfg)
 	if err != nil {
 		return errors.Wrapf(err, "error creating discovery client using: %v", r.cfg)
 	}
 
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-
-	// 2. Prepare the dynamic client
 	dyn, err := dynamic.NewForConfig(r.cfg)
 	if err != nil {
 		return errors.Wrapf(err, "error creating dynamic client using: %v", r.cfg)
 	}
 
-	// 3. Decode YAML manifest into unstructured.Unstructured
 	obj := &unstructured.Unstructured{}
 	_, gvk, err := decUnstructured.Decode([]byte(deploymentYAML), nil, obj)
 	if err != nil {
@@ -110,28 +105,20 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 	r.logger.Infof("name:%s, ns:%s kind:%s, version:%s",
 		obj.GetName(), obj.GetNamespace(), gvk.GroupKind(), gvk.Version)
 
-	// 4. Find GVR
 	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 	if err != nil {
 		return errors.Wrapf(err, "error creating REST mapping: %v", gvk.GroupKind())
 	}
 
 	r.logger.Infof("resource: %v, scope: %v", mapping.Resource, mapping.Scope)
-
-	// 5. Obtain REST interface for the GVR
 	dr := dyn.Resource(mapping.Resource).Namespace(ns.Name)
 
-	// 6. Marshal object into JSON
 	data, err := json.Marshal(obj)
 	if err != nil {
 		return errors.Wrapf(err, "error marshaling object: %v", obj)
 	}
 
 	r.logger.Infof("patching %s in %s... ", obj.GetName(), obj.GetNamespace())
-
-	// 7. Create or Update the object with SSA
-	//     types.ApplyPatchType indicates SSA.
-	//     FieldManager specifies the field owner ID.
 	_, err = dr.Patch(ctx, obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
 		FieldManager: r.fileManager,
 	})
@@ -141,12 +128,11 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 	}
 
 	r.logger.Infof("object %s applied in %s... ", obj.GetName(), obj.GetNamespace())
-
 	return nil
 }
 
-// k8s configmap includes a subdirectory with a version of each file
-// this lists only the top dir files, no walking down
+// k8s configmap mounts include version subdirectories
+// so no walking down, just list the top dir files
 func getFiles(dir, pattern string) ([]string, error) {
 	var matches []string
 	files, err := ioutil.ReadDir(dir)
