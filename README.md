@@ -73,6 +73,12 @@ The log you followed in the deployment should now include:
 }
 ```
 
+You can also check on the namespace impact, in this case role and role binding:
+
+```shell
+kubectl get Roles,RoleBindings -n test1
+```
+
 To remove the label:
 
 > note, removing trigger label just prevents the trigger from firming again on that namespace, it does not undo the already created resources
