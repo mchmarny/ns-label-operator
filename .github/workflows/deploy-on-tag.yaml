@@ -14,15 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Start
-      uses: rjstone/discord-webhook-notify@v1
-      with:
-        severity: warn
-        details: Release creation started...
-        description: ${{ env.APP_NAME }}
-        webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}        
-        avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
-          
     - name: Setup
       uses: actions/setup-go@v2
       with:
@@ -67,11 +58,3 @@ jobs:
         push: true
         tags: ${{ env.RELEASE_VERSION }},latest
         
-    - name: End
-      uses: rjstone/discord-webhook-notify@v1
-      with:
-        severity: info
-        details: Completed - ghcr.io/mchmarny/${{ env.APP_NAME }}:${{ env.RELEASE_VERSION }}
-        description: ${{ env.APP_NAME }}
-        webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}        
-        avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
