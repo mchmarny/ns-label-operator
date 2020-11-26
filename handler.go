@@ -5,15 +5,14 @@ import (
 )
 
 func nsChangeHandler(oldObj interface{}, newObj interface{}) {
-	oldNs := oldObj.(*corev1.Namespace)
-	newNs := newObj.(*corev1.Namespace)
-
-	// not sure if that's even possible
-	if newNs == nil {
+	if newObj == nil {
 		return
 	}
 
-	logger.Infof("testing ns: %s\n", newNs.GetName())
+	oldNs := oldObj.(*corev1.Namespace)
+	newNs := newObj.(*corev1.Namespace)
+
+	logger.Debugf("processing namespace: %s", newNs.GetName())
 
 	// skip if new ns is being deleted
 	if newNs.Status.Phase == corev1.NamespaceTerminating {
@@ -41,11 +40,11 @@ func nsChangeHandler(oldObj interface{}, newObj interface{}) {
 		return
 	}
 
-	logger.Infof("triggering (%s) on ns: %s (labels: %v)", triggerLabel, newNs.GetName(), newNs.GetLabels())
+	logger.Debugf("triggering:%s on:%s in ns:%s", triggerLabel, newNs.GetLabels(), newNs.GetName())
 	if err := trigger.run(newNs); err != nil {
 		logger.Errorf("error running trigger %s on %s: %v", triggerLabel, newNs.GetName(), err)
 		return
 	}
 
-	logger.Infof("trigger %s applied on %s", triggerLabel, newNs.GetName())
+	logger.Infof("trigger:%s applied on:%s", triggerLabel, newNs.GetName())
 }

@@ -33,7 +33,7 @@ type triggerCmd struct {
 }
 
 func (r *triggerCmd) init(dir string) error {
-	r.logger.Debugf("config dir: %s", dir)
+	r.logger.Infof("laoding manifests from: %s", dir)
 
 	files, err := getFiles(dir, "*.yaml")
 	if err != nil {
@@ -41,20 +41,16 @@ func (r *triggerCmd) init(dir string) error {
 	}
 
 	r.manifests = make([]string, 0)
-
 	for _, f := range files {
-		r.logger.Debugf("parsing %s file", f)
+		r.logger.Infof("parsing %s file", f)
 		b, err := ioutil.ReadFile(f)
 		if err != nil {
 			return errors.Wrapf(err, "error reading manifest: %s", f)
 		}
-		for _, y := range strings.Split(string(b), "---") {
-			r.manifests = append(r.manifests, y)
-		}
+		r.manifests = append(r.manifests, strings.Split(string(b), "---")...)
 	}
 
-	r.logger.Debugf("found %d YAML manifest(s) from %d file(s)", len(r.manifests), len(files))
-
+	r.logger.Infof("found %d YAML manifest(s) from %d file(s)", len(r.manifests), len(files))
 	return nil
 }
 
@@ -64,7 +60,6 @@ func (r *triggerCmd) run(ns *corev1.Namespace) error {
 	}
 
 	r.logger.Debugf("running %d files on %s namespace", len(r.manifests), ns.Name)
-
 	ctx := context.Background()
 	for i, y := range r.manifests {
 		if err := r.serverApply(ctx, ns, y); err != nil {
@@ -118,7 +113,7 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 		return errors.Wrapf(err, "error marshaling object: %v", obj)
 	}
 
-	r.logger.Infof("patching %s in %s... ", obj.GetName(), obj.GetNamespace())
+	r.logger.Debugf("patching %s in %s... ", obj.GetName(), obj.GetNamespace())
 	_, err = dr.Patch(ctx, obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
 		FieldManager: r.fileManager,
 	})

@@ -19,15 +19,15 @@ import (
 const (
 	triggerValue     = "true"
 	configDirDefault = "/config"
+	operatorName     = "ns-label-operator"
 )
 
 var (
 	configPath   = getEnvVar("KUBECONFIG", "")
+	dirPath      = getEnvVar("CONFIG_DIR", configDirDefault)
 	triggerLabel = getEnvVar("TRIGGER_LABEL", "dapr-enabled")
 	debug        = getEnvVar("DEBUG", "") == "true"
 	logJSON      = getEnvVar("LOG_TO_JSON", "") == "true"
-	dirPath      = getEnvVar("CONFIG_DIR", configDirDefault)
-	fileManager  = getEnvVar("FILE_MANAGER", "ns-label-operator")
 
 	logger  = getLogger(debug, logJSON)
 	trigger *triggerCmd
@@ -35,11 +35,13 @@ var (
 
 func getConfig(file string) (cfg *rest.Config, err error) {
 	if file == "" {
+		logger.Info("using cluster config")
 		cfg, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, errors.Wrap(err, "error loading in cluster config")
 		}
 	} else {
+		logger.Infof("using: %s", file)
 		cfg, err = cmd.BuildConfigFromFlags("", file)
 		if err != nil {
 			return nil, errors.Wrapf(err, "error loading config from: %s", file)
@@ -62,7 +64,7 @@ func getLogger(debug, logJSON bool) *logrus.Logger {
 }
 
 func main() {
-	logger.Infof("loading client from %s...", configPath)
+	logger.Infof("starting %s", operatorName)
 	cfg, err := getConfig(configPath)
 	if err != nil {
 		log.Fatalf("error loading config: %v", err)
@@ -77,7 +79,7 @@ func main() {
 		cfg:         cfg,
 		cs:          clientSet,
 		logger:      logger,
-		fileManager: fileManager,
+		fileManager: operatorName,
 	}
 
 	if err := trigger.init(dirPath); err != nil {
@@ -86,18 +88,16 @@ func main() {
 
 	factory := informers.NewSharedInformerFactory(clientSet, 0) // 0 == don't sync
 	informer := factory.Core().V1().Namespaces().Informer()
-	stopper := make(chan struct{})
-	defer close(stopper)
+	stopCh := make(chan struct{})
+	defer close(stopCh)
 	defer runtime.HandleCrash()
-	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		UpdateFunc: nsChangeHandler,
-	})
-	go informer.Run(stopper)
-	if !cache.WaitForCacheSync(stopper, informer.HasSynced) {
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{UpdateFunc: nsChangeHandler})
+	go informer.Run(stopCh)
+	if !cache.WaitForCacheSync(stopCh, informer.HasSynced) {
 		runtime.HandleError(errors.New("timed out waiting for caches to sync"))
 		return
 	}
-	<-stopper
+	<-stopCh
 }
 
 func getEnvVar(key, fallbackValue string) string {

@@ -1,30 +1,40 @@
 # ns-label-operator
 
-Watches kubernetes namespaces and fires a trigger to apply pre-configured yaml to that namespace when specific label on that namespace is set to true. Helpful to configure new namespace with specific roles, trace forwarders, or other common settings.
+Watches kubernetes namespaces for specific label and applies pre-configured YAML files to those namespaces that have that label set to true. Helpful in configuring common roles, trace forwarders, or other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 
 ## config 
 
-Create the `ns-watcher` namespace and `trigger-config` config map with the content you want to execute when namespace is labeled. That file can include multiple YAML blocks. See [test.yaml](manifests/test.yaml) for example.
-
-> Note, you can load as many files as you like but the files must have `*.yaml` extension for the operator to read them
+Create the `ns-watcher` namespace:
 
 ```shell
 kubectl create ns ns-watcher
-kubectl create cm trigger-config --from-file manifests/test.yaml -n ns-watcher
+```
+
+Next, create `trigger-label` config map with the name of the namespace label for which you want watch.
+
+```shell
+kubectl create cm trigger-label \
+    --from-literal label=dapr-enabled \
+    -n ns-watcher
+```
+
+Next, create `trigger-config` config map with the content you want to execute when the specific label is applied to a namespace.
+
+> You can load multiple files and each file can include multiple YAML blocks. See [role.yaml](manifests/role.yaml) for example. The files must have `*.yaml` extension for the operator to read them.
+
+```shell
+kubectl create cm trigger-config \
+    --from-file manifests/role.yaml \
+    --from-file manifests/exporter.yaml \
+    -n ns-watcher
 ```
 
 ## deployment 
 
-Apply the `ns-label-operator` deployment that will create:
-
-* `ns-watcher` namespace 
-* `ns-watcher-account` service account 
-* `ns-reader-role` cluster role able to `get`, `list`, `watch` namespaces
-* `ns-reader-cluster-binding` cluster role binding `ns-watcher-account` to `ns-reader-role` 
-* `ns-label-operator` deployment 
+Apply the deployment:
 
 ```shell
-kubectl apply -f deployment.yaml
+kubectl apply -f deployments/deployment.yaml
 ```
 
 Check on the deployment status:
@@ -36,8 +46,8 @@ kubectl get pods -n ns-watcher
 The result should look something like this: 
 
 ```shell
-NAME                                READY   STATUS    RESTARTS   AGE
-ns-label-operator-7885dc789b-7v6rj  1/1     Running   0          10m
+NAME                                 READY   STATUS    RESTARTS   AGE
+ns-label-operator-67d47c58b6-46vx6   1/1     Running   0          12s
 ```
 
 Now, follow `ns-label-operator` logs: 
@@ -76,7 +86,7 @@ The log you followed in the deployment should now include:
 You can also check on the namespace impact, in this case role and role binding:
 
 ```shell
-kubectl get Roles,RoleBindings -n test1
+kubectl get all,Roles,RoleBindings -n test1
 ```
 
 To remove the label:
@@ -87,19 +97,24 @@ To remove the label:
 kubectl label ns test1 dapr-enabled-
 ```
 
-To clean up, just delete the namespace:
+To delete the namespace:
 
 ```shell
 kubectl delete ns test1
 ```
-
 
 ## cleanup 
 
 To delete the entire deployment:
 
 ```shell
-kubectl delete -f deployment.yaml
-kubectl delete cm trigger-config -n ns-watcher
+kubectl delete ns ns-watcher
 ```
 
+## Disclaimer
+
+This is my personal project and it does not represent my employer. While I do my best to ensure that everything works, I take no responsibility for issues caused by this code.
+
+## License
+
+This software is released under the [MIT](./LICENSE)

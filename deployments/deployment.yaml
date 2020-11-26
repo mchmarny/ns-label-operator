@@ -48,10 +48,13 @@ spec:
       serviceAccountName: ns-watcher-account
       containers:
       - name: watch
-        image: ghcr.io/mchmarny/ns-label-operator:v0.2.5
+        image: ghcr.io/mchmarny/ns-label-operator:v0.2.6
         env:
         - name: TRIGGER_LABEL
-          value: "dapr-enabled"
+          valueFrom:
+            configMapKeyRef:
+              name: trigger-label
+              key: label
         - name: DEBUG
           value: "true"
         - name: LOG_TO_JSON
