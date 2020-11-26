@@ -26,8 +26,8 @@ var (
 	configPath   = getEnvVar("KUBECONFIG", "")
 	dirPath      = getEnvVar("CONFIG_DIR", configDirDefault)
 	triggerLabel = getEnvVar("TRIGGER_LABEL", "dapr-enabled")
-	debug        = getEnvVar("DEBUG", "") == "true"
-	logJSON      = getEnvVar("LOG_TO_JSON", "") == "true"
+	debug        = getEnvVar("DEBUG", "false") == "true"
+	logJSON      = getEnvVar("LOG_TO_JSON", "true") == "true"
 
 	logger  = getLogger(debug, logJSON)
 	trigger *triggerCmd
@@ -53,7 +53,7 @@ func getConfig(file string) (cfg *rest.Config, err error) {
 func getLogger(debug, logJSON bool) *logrus.Logger {
 	l := logrus.New()
 	l.SetOutput(os.Stdout)
-	l.SetLevel(logrus.WarnLevel)
+	l.SetLevel(logrus.InfoLevel)
 	if debug {
 		l.SetLevel(logrus.TraceLevel)
 	}

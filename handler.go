@@ -46,5 +46,5 @@ func nsChangeHandler(oldObj interface{}, newObj interface{}) {
 		return
 	}
 
-	logger.Infof("trigger:%s applied on:%s", triggerLabel, newNs.GetName())
+	logger.Infof("trigger:%s applied on namespace:%s", triggerLabel, newNs.GetName())
 }

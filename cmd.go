@@ -33,7 +33,7 @@ type triggerCmd struct {
 }
 
 func (r *triggerCmd) init(dir string) error {
-	r.logger.Infof("laoding manifests from: %s", dir)
+	r.logger.Infof("loading manifests from: %s", dir)
 
 	files, err := getFiles(dir, "*.yaml")
 	if err != nil {
@@ -105,7 +105,7 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 		return errors.Wrapf(err, "error creating REST mapping: %v", gvk.GroupKind())
 	}
 
-	r.logger.Infof("resource: %v, scope: %v", mapping.Resource, mapping.Scope)
+	r.logger.Debugf("resource: %v, scope: %v", mapping.Resource, mapping.Scope)
 	dr := dyn.Resource(mapping.Resource).Namespace(ns.Name)
 
 	data, err := json.Marshal(obj)
@@ -122,7 +122,7 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 		return errors.Wrapf(err, "error applying %s to %s", string(data), obj.GetName())
 	}
 
-	r.logger.Infof("object %s applied in %s... ", obj.GetName(), obj.GetNamespace())
+	r.logger.Debugf("object %s applied in %s... ", obj.GetName(), obj.GetNamespace())
 	return nil
 }
 

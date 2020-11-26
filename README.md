@@ -59,34 +59,30 @@ kubectl logs -f -l app=ns-label-operator -n ns-watcher
 
 ## test
 
-> Assumes namespace named `test1` and the label to trigger on when `true` is `dapr-enabled`
+> Assumes namespace named `demo1` and the label to trigger on when `true` is `dapr-enabled`
 
 In a separate terminal now, create a namespace:
 
 ```shell
-kubectl create ns test1
+kubectl create ns demo1
 ```
 
 Label and now label that namespace:
 
 ```shell
-kubectl label ns test1 dapr-enabled=true
+kubectl label ns demo1 dapr-enabled=true
 ```
 
 The log you followed in the deployment should now include:
 
 ```json
-{
-    "level":"info",
-    "msg":"triggering (dapr-enabled) on ns: test1 (labels: map[dapr-enabled:true])",
-    "time":"2020-11-25T15:44:28Z"
-}
+
 ```
 
 You can also check on the namespace impact, in this case role and role binding:
 
 ```shell
-kubectl get all,Roles,RoleBindings -n test1
+kubectl get all,Roles,RoleBindings -n demo1
 ```
 
 To remove the label:
@@ -100,7 +96,7 @@ kubectl label ns test1 dapr-enabled-
 To delete the namespace:
 
 ```shell
-kubectl delete ns test1
+kubectl delete ns demo1
 ```
 
 ## cleanup 
