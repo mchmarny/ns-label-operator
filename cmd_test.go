@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"os/user"
 	"path"
 	"testing"
@@ -21,6 +22,12 @@ func TestCmd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting config path: %v", err)
 	}
+
+	if _, err := os.Stat(f); err != nil && os.IsNotExist(err) {
+		t.Logf("kube config file doesn't exists: %s", f)
+		t.SkipNow() // TODO: kube config in hithub action
+	}
+
 	cfg, err := getConfig(f)
 	if err != nil {
 		t.Fatalf("error loading config: %v", err)
