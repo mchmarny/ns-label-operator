@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -61,8 +62,9 @@ func (r *triggerCmd) run(ns *corev1.Namespace) error {
 	}
 	r.logger.Debugf("ns: %s", ns.Name)
 
+	ctx := context.Background()
 	for _, y := range r.yamlFiles {
-		if err := r.serverApply(ns, y); err != nil {
+		if err := r.serverApply(ctx, ns, y); err != nil {
 			r.logger.Errorf("error applying yaml (%s): %v", y, err)
 			continue
 		}
@@ -70,7 +72,7 @@ func (r *triggerCmd) run(ns *corev1.Namespace) error {
 	return nil
 }
 
-func (r *triggerCmd) serverApply(ns *corev1.Namespace, deploymentYAML string) error {
+func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, deploymentYAML string) error {
 	if ns == nil {
 		return errors.New("nil namespace")
 	}
@@ -124,7 +126,7 @@ func (r *triggerCmd) serverApply(ns *corev1.Namespace, deploymentYAML string) er
 	// 7. Create or Update the object with SSA
 	//     types.ApplyPatchType indicates SSA.
 	//     FieldManager specifies the field owner ID.
-	_, err = dr.Patch(obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
+	_, err = dr.Patch(ctx, obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
 		FieldManager: r.fileManager,
 	})
 
