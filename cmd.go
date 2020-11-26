@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -18,12 +17,14 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 )
 
 type triggerCmd struct {
 	cfg         *rest.Config
+	cs          *kubernetes.Clientset
 	logger      *logrus.Logger
 	fileManager string
 	yamlFiles   []string
@@ -55,28 +56,36 @@ func (r *triggerCmd) init(yamlPath string) error {
 }
 
 func (r *triggerCmd) run(ns *corev1.Namespace) error {
-	r.logger.Debugf("ns: %+v", ns)
+	if ns == nil {
+		return errors.New("nil namespace")
+	}
+	r.logger.Debugf("ns: %s", ns.Name)
 
 	for _, y := range r.yamlFiles {
-		if err := r.apply(y); err != nil {
+		if err := r.serverApply(ns, y); err != nil {
 			r.logger.Errorf("error applying yaml (%s): %v", y, err)
 			continue
 		}
 	}
-
 	return nil
 }
 
-func (r *triggerCmd) apply(deploymentYAML string) error {
-	r.logger.Debugf("yaml: %s", deploymentYAML)
+func (r *triggerCmd) serverApply(ns *corev1.Namespace, deploymentYAML string) error {
+	if ns == nil {
+		return errors.New("nil namespace")
+	}
+	if deploymentYAML == "" {
+		return errors.New("empty deployment YAML vairable")
+	}
 
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	// 1. Prepare a RESTMapper to find GVR
 	dc, err := discovery.NewDiscoveryClientForConfig(r.cfg)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error creating discovery client using: %v", r.cfg)
 	}
+
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
 
 	// 2. Prepare the dynamic client
@@ -91,6 +100,7 @@ func (r *triggerCmd) apply(deploymentYAML string) error {
 	if err != nil {
 		return errors.Wrapf(err, "error decoding YAML: %v", deploymentYAML)
 	}
+	r.logger.Infof("name: %s, obj kind: %s, version: %s", obj.GetName(), gvk.GroupKind(), gvk.Version)
 
 	// 4. Find GVR
 	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
@@ -98,21 +108,18 @@ func (r *triggerCmd) apply(deploymentYAML string) error {
 		return errors.Wrapf(err, "error creating REST mapping: %v", gvk.GroupKind())
 	}
 
+	r.logger.Infof("resource: %v, scope: %v", mapping.Resource, mapping.Scope)
+
 	// 5. Obtain REST interface for the GVR
-	var dr dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		// namespaced resources should specify the namespace
-		dr = dyn.Resource(mapping.Resource).Namespace(obj.GetNamespace())
-	} else {
-		// for cluster-wide resources
-		dr = dyn.Resource(mapping.Resource)
-	}
+	dr := dyn.Resource(mapping.Resource).Namespace(ns.Name)
 
 	// 6. Marshal object into JSON
 	data, err := json.Marshal(obj)
 	if err != nil {
 		return errors.Wrapf(err, "error marshaling object: %v", obj)
 	}
+
+	r.logger.Infof("patching %s... ", obj.GetName())
 
 	// 7. Create or Update the object with SSA
 	//     types.ApplyPatchType indicates SSA.
@@ -122,7 +129,7 @@ func (r *triggerCmd) apply(deploymentYAML string) error {
 	})
 
 	if err != nil {
-		return errors.Wrapf(err, "error applying object: %s", string(data))
+		return errors.Wrapf(err, "error applying %s to %s", string(data), obj.GetName())
 	}
 
 	return nil

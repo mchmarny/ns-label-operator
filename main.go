@@ -27,6 +27,7 @@ var (
 	debug        = getEnvVar("DEBUG", "") == "true"
 	logJSON      = getEnvVar("LOG_TO_JSON", "") == "true"
 	yamlPath     = getEnvVar("YAML_PATH", yamlPathDefault)
+	fileManager  = getEnvVar("FILE_MANAGER", "ns-label-trigger")
 
 	logger  = getLogger(debug, logJSON)
 	trigger *triggerCmd
@@ -67,14 +68,16 @@ func main() {
 		log.Fatalf("error loading config: %v", err)
 	}
 
-	trigger = &triggerCmd{
-		cfg:    cfg,
-		logger: logger,
-	}
-
 	clientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		log.Fatalf("error creating client set from (%+v): %v", cfg, err)
+	}
+
+	trigger = &triggerCmd{
+		cfg:         cfg,
+		cs:          clientSet,
+		logger:      logger,
+		fileManager: fileManager,
 	}
 
 	if err := trigger.init(yamlPath); err != nil {
