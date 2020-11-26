@@ -6,7 +6,7 @@ Watches kubernetes namespaces and fires a trigger to apply pre-configured yaml t
 
 Create the `ns-watcher` namespace and `trigger-config` config map with the content you want to execute when namespace is labeled. That file can include multiple YAML blocks. See [test.yaml](manifests/test.yaml) for example.
 
-> Note, the file you load must have `*.yaml` extension to be read by the operator
+> Note, you can load as many files as you like but the files must have `*.yaml` extension for the operator to read them
 
 ```shell
 kubectl create ns ns-watcher
