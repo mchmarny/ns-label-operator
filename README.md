@@ -2,6 +2,8 @@
 
 Watches kubernetes namespaces for specific label and applies pre-configured YAML files to those namespaces that have that label set to true. Helpful in configuring common roles, trace forwarders, or other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 
+> This is fully functional now although still little too manual. Helm chart in progress. 
+
 ## config 
 
 Create the `ns-watcher` namespace:
@@ -50,12 +52,22 @@ NAME                                 READY   STATUS    RESTARTS   AGE
 ns-label-operator-67d47c58b6-46vx6   1/1     Running   0          12s
 ```
 
-Now, follow `ns-label-operator` logs: 
+Also, check the `ns-label-operator` logs: 
 
 ```shell
 kubectl logs -f -l app=ns-label-operator -n ns-watcher
 ```
 
+On successfully deployment, it should include something like this: 
+
+```json
+{"level":"info","msg":"starting ns-label-operator","time":"2020-11-26T19:35:14Z"}
+{"level":"info","msg":"using cluster config","time":"2020-11-26T19:35:14Z"}
+{"level":"info","msg":"loading manifests from: /config","time":"2020-11-26T19:35:14Z"}
+{"level":"info","msg":"parsing /config/exporter.yaml file","time":"2020-11-26T19:35:14Z"}
+{"level":"info","msg":"parsing /config/role.yaml file","time":"2020-11-26T19:35:14Z"}
+{"level":"info","msg":"found 3 YAML manifest(s) from 2 file(s)","time":"2020-11-26T19:35:14Z"}
+```
 
 ## test
 
@@ -73,30 +85,25 @@ Label and now label that namespace:
 kubectl label ns demo1 dapr-enabled=true
 ```
 
-The log you followed in the deployment should now include:
+The log you followed in the deployment should now also include:
 
 ```json
-
+{"level":"info","msg":"name:zipkin, ns:demo2 kind:Component.dapr.io, version:v1alpha1","time":"2020-11-26T19:37:45Z"}
+{"level":"info","msg":"name:secret-reader, ns:demo2 kind:Role.rbac.authorization.k8s.io, version:v1","time":"2020-11-26T19:37:46Z"}
+{"level":"info","msg":"name:dapr-secret-reader, ns:demo2 kind:RoleBinding.rbac.authorization.k8s.io, version:v1","time":"2020-11-26T19:37:46Z"}
+{"level":"info","msg":"trigger:dapr-enabled applied on namespace:demo2","time":"2020-11-26T19:37:46Z"}
 ```
 
-You can also check on the namespace impact, in this case role and role binding:
+You can also check on the changes made in the namespace:
 
 ```shell
 kubectl get all,Roles,RoleBindings -n demo1
 ```
 
-To remove the label:
-
-> note, removing trigger label just prevents the trigger from firming again on that namespace, it does not undo the already created resources
+> Note, you can remove trigger label but that's just prevents the trigger from firming again on that namespace, it does not undo the already created resources
 
 ```shell
 kubectl label ns test1 dapr-enabled-
-```
-
-To delete the namespace:
-
-```shell
-kubectl delete ns demo1
 ```
 
 ## cleanup 
@@ -104,6 +111,7 @@ kubectl delete ns demo1
 To delete the entire deployment:
 
 ```shell
+kubectl delete -f deployments/deployment.yaml
 kubectl delete ns ns-watcher
 ```
 
