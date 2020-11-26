@@ -1,4 +1,4 @@
-module github.com/mchmarny/ns-label-trigger
+module github.com/mchmarny/ns-label-operator
 
 go 1.15
 

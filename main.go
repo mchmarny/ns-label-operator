@@ -27,7 +27,7 @@ var (
 	debug        = getEnvVar("DEBUG", "") == "true"
 	logJSON      = getEnvVar("LOG_TO_JSON", "") == "true"
 	yamlPath     = getEnvVar("YAML_PATH", yamlPathDefault)
-	fileManager  = getEnvVar("FILE_MANAGER", "ns-label-trigger")
+	fileManager  = getEnvVar("FILE_MANAGER", "ns-label-operator")
 
 	logger  = getLogger(debug, logJSON)
 	trigger *triggerCmd

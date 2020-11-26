@@ -1,5 +1,5 @@
-APP_VERSION  ?=v0.1.7
-APP_ID       ?=ns-label-trigger
+APP_VERSION  ?=v0.2.1
+APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 
 .PHONY: all
