@@ -23,7 +23,9 @@ certs
 *.pem
 
 
-deployment.yaml
+deployments
+manifests
+.github
 LICENSE
 Makefile
 README.md
