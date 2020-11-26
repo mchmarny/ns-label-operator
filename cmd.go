@@ -102,7 +102,9 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 	if err != nil {
 		return errors.Wrapf(err, "error decoding YAML: %v", deploymentYAML)
 	}
-	r.logger.Infof("name: %s, obj kind: %s, version: %s", obj.GetName(), gvk.GroupKind(), gvk.Version)
+	obj.SetNamespace(ns.GetName())
+	r.logger.Infof("name:%s, ns:%s kind:%s, version:%s",
+		obj.GetName(), obj.GetNamespace(), gvk.GroupKind(), gvk.Version)
 
 	// 4. Find GVR
 	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
@@ -121,7 +123,7 @@ func (r *triggerCmd) serverApply(ctx context.Context, ns *corev1.Namespace, depl
 		return errors.Wrapf(err, "error marshaling object: %v", obj)
 	}
 
-	r.logger.Infof("patching %s... ", obj.GetName())
+	r.logger.Infof("patching %s in %s... ", obj.GetName(), obj.GetNamespace())
 
 	// 7. Create or Update the object with SSA
 	//     types.ApplyPatchType indicates SSA.

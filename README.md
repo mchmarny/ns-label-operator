@@ -1,10 +1,10 @@
-# ns-label-trigger
+# ns-label-operator
 
-Watches kubernetes namespaces and fires a trigger when specific label is set to true.
+Watches kubernetes namespaces and fires a trigger to apply pre-configured yaml when specific label is set to true. Helpful to configure namespace with specific roles, forwarders, or other common settings.
 
 ## config 
 
-Create a config map with the content you want to execute when namespace is labeled:
+Create a `trigger-config` config map with the content you want to execute when namespace is labeled. That file can include multiple YAML blocks. See [test.yaml](./test.yaml) for example.
 
 ```shell
 kubectl create cm trigger-config --from-file test.yaml -n ns-watcher
@@ -12,7 +12,7 @@ kubectl create cm trigger-config --from-file test.yaml -n ns-watcher
 
 ## deployment 
 
-Apply the deployment that will create:
+Apply the `ns-label-trigger` deployment that will create:
 
 * `ns-watcher` namespace 
 * `ns-watcher-account` service account 
