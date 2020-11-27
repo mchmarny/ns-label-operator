@@ -18,7 +18,7 @@ tidy: ## Updates the go modules and vendors all dependencies
 
 .PHONY: test
 test: tidy ## Tests the entire project 
-	go test -v -count=1 -race ./...
+	go test -v -count=1 -race -coverprofile=coverage.txt -covermode=atomic ./...
 
 .PHONY: build
 build: tidy ## build code

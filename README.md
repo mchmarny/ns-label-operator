@@ -1,6 +1,6 @@
 # ns-label-operator
 
-![Release](https://github.com/mchmarny/ns-label-operator/workflows/Release/badge.svg) ![Head](https://github.com/mchmarny/ns-label-operator/workflows/Test/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/mchmarny/ns-label-operator)](https://goreportcard.com/report/github.com/mchmarny/ns-label-operator) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mchmarny/ns-label-operator) [![codecov](https://codecov.io/gh/mchmarny/ns-label-operator/branch/main/graph/badge.svg)](https://codecov.io/gh/mchmarny/ns-label-operator)
+![Release](https://github.com/mchmarny/ns-label-operator/workflows/Release/badge.svg) ![Head](https://github.com/mchmarny/ns-label-operator/workflows/Test/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/mchmarny/ns-label-operator)](https://goreportcard.com/report/github.com/mchmarny/ns-label-operator) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mchmarny/ns-label-operator) [![codecov](https://codecov.io/gh/mchmarny/ns-label-operator/branch/main/graph/badge.svg?token=COOCQF289Q)](https://codecov.io/gh/mchmarny/ns-label-operator)
 
 Watches Kubernetes namespaces and applies pre-configured YAML when specific label is applied to a namespace. Helpful in configuring common roles, trace forwarders, or any other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 
