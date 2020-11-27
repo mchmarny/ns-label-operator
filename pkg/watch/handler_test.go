@@ -21,19 +21,7 @@ func getNS(active bool, labels map[string]string) *corev1.Namespace {
 }
 
 func TestHandler(t *testing.T) {
-	f, err := getLocalConfigPath()
-	if err != nil {
-		t.Fatalf("error getting config path: %v", err)
-	}
-
-	w, err := NewNsWatch(Config{
-		Label:       "test",
-		ConfigFile:  f,
-		ManifestDir: "../../manifests",
-	})
-	if err != nil {
-		t.Fatalf("error creating watch: %v", err)
-	}
+	w := getTestWatchInstance(t)
 
 	t.Run("without triggering label", func(t *testing.T) {
 		oldNs := getNS(true, map[string]string{})

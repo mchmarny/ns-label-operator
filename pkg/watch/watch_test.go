@@ -16,6 +16,23 @@ func getLocalConfigPath() (string, error) {
 	return path.Join(usr.HomeDir, ".kube/config"), nil
 }
 
+func getTestWatchInstance(t *testing.T) *NsWatch {
+	f, err := getLocalConfigPath()
+	if err != nil {
+		t.Fatalf("error getting config path: %v", err)
+	}
+
+	w, err := NewNsWatch(Config{
+		Label:       "test",
+		ConfigFile:  f,
+		ManifestDir: "../../manifests",
+	})
+	if err != nil {
+		t.Fatalf("error creating watch: %v", err)
+	}
+	return w
+}
+
 func TestWatch(t *testing.T) {
 	f, err := getLocalConfigPath()
 	if err != nil {
