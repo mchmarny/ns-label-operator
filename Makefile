@@ -41,7 +41,9 @@ deploy: ## Deploys pre-build image to k8s
 .PHONY: spell 
 spell: ## Checks spelling across the entire project 
 	# go get github.com/client9/misspell/cmd/misspell
-	misspell -locale="US" -error -source="text" *.go
+	misspell -locale="US" -error -source="text" cmd/*
+	misspell -locale="US" -error -source="text" pkg/**
+	misspell -locale="US" -error -source="text" *.md
 
 tag: ## Creates release tag 
 	git tag $(APP_VERSION)

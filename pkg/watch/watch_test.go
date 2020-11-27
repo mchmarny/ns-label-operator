@@ -1,7 +1,6 @@
 package watch
 
 import (
-	"os"
 	"os/user"
 	"path"
 	"testing"
@@ -23,12 +22,27 @@ func TestWatch(t *testing.T) {
 		t.Fatalf("error getting config path: %v", err)
 	}
 
-	if _, err := os.Stat(f); err != nil && os.IsNotExist(err) {
-		t.Logf("kube config file doesn't exists: %s", f)
-		t.SkipNow() // TODO: kube config in hithub action
-	}
+	conf := Config{}
 
-	if _, err := NewNsWatch(nil, "dapr-enabled", f, "../../manifests"); err != nil {
-		t.Fatalf("error creating watch: %v", err)
-	}
+	t.Run("with empty config", func(t *testing.T) {
+		if _, err := NewNsWatch(conf); err == nil {
+			t.Fatal()
+		}
+	})
+
+	t.Run("without manifest dir", func(t *testing.T) {
+		conf.Label = "dapr-enabled"
+		if _, err := NewNsWatch(conf); err == nil {
+			t.Fatal()
+		}
+	})
+
+	t.Run("with valid config", func(t *testing.T) {
+		conf.Label = "dapr-enabled"
+		conf.ConfigFile = f
+		conf.ManifestDir = "../../manifests"
+		if _, err := NewNsWatch(conf); err != nil {
+			t.Fatalf("error creating watch: %v", err)
+		}
+	})
 }

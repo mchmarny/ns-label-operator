@@ -4,7 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (w *NsWatch) labelHandler(oldObj interface{}, newObj interface{}) {
+func (w *NsWatch) namespaceHandler(oldObj interface{}, newObj interface{}) {
 	if newObj == nil {
 		return
 	}

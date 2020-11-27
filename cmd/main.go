@@ -5,9 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/mchmarny/ns-label-operator/pkg/watch"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,13 +31,18 @@ func main() {
 		})
 	}
 
-	w, err := watch.NewNsWatch(logger, label, configPath, dirPath)
+	nsw, err := watch.NewNsWatch(watch.Config{
+		Label:       label,
+		ConfigFile:  configPath,
+		ManifestDir: dirPath,
+		Logger:      logger,
+	})
+
 	if err != nil {
 		log.Fatalf("error initializing watch: %v", err)
 	}
 
-	// run will block while running
-	if err := w.Run(); err != nil {
+	if err := nsw.Run(); err != nil {
 		log.Fatalf("error running watch: %v", err)
 	}
 }
