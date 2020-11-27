@@ -8,7 +8,7 @@ env:
 
 jobs:
   build:
-    name: Create Release
+    name: Test Latest
     runs-on: ubuntu-latest
     steps:
 
@@ -45,23 +45,4 @@ jobs:
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
         go test -v -count=1 -race ./...
-
-    - name: Variables
-      run: |
-        echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Info
-      run: |
-        echo "::debug::RELEASE_VERSION=${{ env.RELEASE_VERSION }}"
-
-    - name: Publish
-      uses: docker/build-push-action@v1
-      with:
-        context: .
-        file: ./Dockerfile
-        username: ${{ github.actor }}
-        password: ${{ secrets.OPS_TOKEN }}
-        registry: ghcr.io
-        push: true
-        tags: ${{ env.RELEASE_VERSION }},latest
         
