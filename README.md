@@ -1,6 +1,6 @@
 # ns-label-operator
 
-![Image on tag](https://github.com/mchmarny/ns-label-operator/workflows/Image%20on%20tag/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/mchmarny/ns-label-operator)](https://goreportcard.com/report/github.com/mchmarny/ns-label-operator) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mchmarny/ns-label-operator)
+![Release](https://github.com/mchmarny/ns-label-operator/workflows/Release/badge.svg) ![Test](https://github.com/mchmarny/ns-label-operator/workflows/Test/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/mchmarny/ns-label-operator)](https://goreportcard.com/report/github.com/mchmarny/ns-label-operator) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mchmarny/ns-label-operator)
 
 Watches kubernetes namespaces for specific label and applies pre-configured YAML files to those namespaces that have that label set to true. Helpful in configuring common roles, trace forwarders, or other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 

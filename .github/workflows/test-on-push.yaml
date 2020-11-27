@@ -1,9 +1,7 @@
-name: Release
+name: Test
 
 on:
   push:
-    tags:
-      - 'v*' # v0.1.1
 
 env:
   APP_NAME: ns-label-operator
