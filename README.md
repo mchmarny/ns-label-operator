@@ -106,6 +106,33 @@ kubectl get all,Roles,RoleBindings -n demo1
 kubectl label ns test1 dapr-enabled-
 ```
 
+## library 
+
+To use `ns-label-operator` as a library first import the `watch`:
+
+```go
+import "github.com/mchmarny/ns-label-operator/pkg/watch"
+```
+
+Than create an instance of `NsWatch`:
+
+```go
+w, err := watch.NewNsWatch(logger, label, configPath, dirPath)
+if err != nil {
+    log.Fatalf("error initializing watch: %v", err)
+}
+```
+
+And finally run it: 
+
+> Note, `Run()` run will block while running. 
+
+```go
+if err := w.Run(); err != nil {
+    log.Fatalf("error running watch: %v", err)
+}
+```
+
 ## cleanup 
 
 To delete the entire deployment:
