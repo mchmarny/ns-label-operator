@@ -25,15 +25,15 @@ const (
 // Config defines NewNsWatch creation configuration.
 type Config struct {
 	// Label name that when applied to namespace with `true` will trigger application of manifests (e.g. enable-role).
-	Label string `yaml:"label"`
+	Label string `yaml:"label" json:"label"`
 	// ConfigFile is the path to Kube config (e.g. ~/.kube/config). When left empty, it assumes in-cluster configuration.
-	ConfigFile string `yaml:"configFile"`
+	ConfigFile string `yaml:"configFile" json:"config-file"`
 	// Manifests is the list of YAML snippets that will applied when matching namespace label is found. When nil, ManifestDir is used to read and populate the YAML manifests. Either Manifests or ManifestDir must be set.
-	Manifests []string `yaml:"-"`
+	Manifests []string `yaml:"-" json:"-"`
 	// ManifestDir is an optional path to directory with YAML documents. When set, it will append to the list of Manifests. Either Manifests or ManifestDir must be set.
-	ManifestDir string `yaml:"manifestDir"`
+	ManifestDir string `yaml:"manifestDir" json:"manifest-dir"`
 	// Logger is an optional preconfigured logger. When nil, it will be configured for os.Stdout with logrus.InfoLevel.
-	Logger *logrus.Logger `yaml:"-"`
+	Logger *logrus.Logger `yaml:"-" json:"-"`
 }
 
 // NewNsWatch creates a new instance of NsWatch
