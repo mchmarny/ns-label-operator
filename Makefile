@@ -20,7 +20,11 @@ build: tidy ## build code
 
 .PHONY: run
 run: ## Runs compiled code
-	KUBECONFIG=~/.kube/config DEBUG=true CONFIG_DIR=manifests TRIGGER_LABEL=dapr-enabled \
+	KUBECONFIG=~/.kube/config \
+	DEBUG=false \
+	LOG_TO_JSON=true \
+	CONFIG_DIR=manifests \
+	TRIGGER_LABEL=dapr-enabled \
 	./bin/$(APP_ID)
 
 .PHONY: image

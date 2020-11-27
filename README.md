@@ -62,18 +62,13 @@ On successfully deployment, it should include something like this:
 
 ```json
 {
-    "level": "debug",
-    "msg": "using cluster config"
-}
-{
-    "level": "debug",
-    "msg": "loading manifests from: /config"
-}
-{
-    "level": "info",
-    "msg": "starting ns-label-operator for dapr-enabled label"
+    "level":"info",
+    "msg":"starting ns-label-operator for label: dapr-enabled",
+    "time":"2020-11-27T06:59:39-08:00"
 }
 ```
+
+Now, try testing it.
 
 ## test
 
@@ -91,13 +86,29 @@ Label and now label that namespace:
 kubectl label ns demo1 dapr-enabled=true
 ```
 
-The log you followed in the deployment should now also include:
+The log you followed in the deployment should now also include the 3 entries, one for each YAML manifest loaded from the 2 files in [manifests](./manifests) directory:
 
 ```json
-{"level":"info","msg":"name:zipkin, ns:demo2 kind:Component.dapr.io, version:v1alpha1","time":"2020-11-26T19:37:45Z"}
-{"level":"info","msg":"name:secret-reader, ns:demo2 kind:Role.rbac.authorization.k8s.io, version:v1","time":"2020-11-26T19:37:46Z"}
-{"level":"info","msg":"name:dapr-secret-reader, ns:demo2 kind:RoleBinding.rbac.authorization.k8s.io, version:v1","time":"2020-11-26T19:37:46Z"}
-{"level":"info","msg":"trigger:dapr-enabled applied on namespace:demo2","time":"2020-11-26T19:37:46Z"}
+{
+    "level":"info",
+    "msg":"name:zipkin, ns:demo8 kind:Component.dapr.io, version:v1alpha1",
+    "time":"2020-11-27T07:01:10-08:00"
+}
+{
+    "level":"info",
+    "msg":"name:secret-reader, ns:demo8 kind:Role.rbac.authorization.k8s.io, version:v1",
+    "time":"2020-11-27T07:01:10-08:00"
+}
+{
+    "level":"info",
+    "msg":"name:dapr-secret-reader, ns:demo8 kind:RoleBinding.rbac.authorization.k8s.io, version:v1",
+    "time":"2020-11-27T07:01:10-08:00"
+}
+{
+    "level":"info",
+    "msg":"trigger:dapr-enabled applied on namespace:demo8",
+    "time":"2020-11-27T07:01:10-08:00"
+}
 ```
 
 You can also check on the changes made in the namespace:
@@ -114,7 +125,7 @@ kubectl label ns test1 dapr-enabled-
 
 ## library 
 
-To use `ns-label-operator` as a library first import the `watch`:
+To use `ns-label-operator` as a library, first import it:
 
 ```go
 import "github.com/mchmarny/ns-label-operator/pkg/watch"
@@ -124,10 +135,10 @@ Than create an instance of `NsWatch`:
 
 ```go
 nsw, err := watch.NewNsWatch(watch.Config{
-    Label:       label,
-    ConfigFile:  configPath,
-    ManifestDir: dirPath,
-    Logger:      logger,
+    Label:       label, // label to watch for
+    ConfigFile:  configPath, // kube config file path or empty for in cluster config
+    ManifestDir: dirPath, // dir path, alternatively set the Manifests with YAML strings 
+    Logger:      logger, // (optional), logrus logger instance, will be created if nil
 })
 handleErr(err)
 ```
