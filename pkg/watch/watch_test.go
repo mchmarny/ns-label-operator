@@ -4,6 +4,7 @@ import (
 	"os/user"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -33,7 +34,7 @@ func getTestWatchInstance(t *testing.T) *NsWatch {
 	return w
 }
 
-func TestWatch(t *testing.T) {
+func TestNsWatch(t *testing.T) {
 	f, err := getLocalConfigPath()
 	if err != nil {
 		t.Fatalf("error getting config path: %v", err)
@@ -48,18 +49,60 @@ func TestWatch(t *testing.T) {
 	})
 
 	t.Run("without manifest dir", func(t *testing.T) {
-		conf.Label = "dapr-enabled"
+		conf.Label = "test"
 		if _, err := NewNsWatch(conf); err == nil {
 			t.Fatal()
 		}
 	})
 
-	t.Run("with valid config", func(t *testing.T) {
-		conf.Label = "dapr-enabled"
+	t.Run("with valid config using dir", func(t *testing.T) {
 		conf.ConfigFile = f
 		conf.ManifestDir = "../../manifests"
 		if _, err := NewNsWatch(conf); err != nil {
 			t.Fatalf("error creating watch: %v", err)
 		}
+	})
+
+	t.Run("with valid config using yaml", func(t *testing.T) {
+		conf.ManifestDir = ""
+		conf.Manifests = []string{
+			`apiVersion: rbac.authorization.k8s.io/v1
+			kind: Role
+			metadata:
+			  name: secret-reader
+			rules:
+			- apiGroups: [""]
+			  resources: ["secrets"]
+			  verbs: ["get"]`,
+			`kind: ClusterRoleBinding
+			apiVersion: rbac.authorization.k8s.io/v1
+			metadata:
+			  name: ns-reader-cluster-binding
+			subjects:
+			- kind: ServiceAccount
+			  name: ns-watcher-account
+			  namespace: ns-watcher
+			roleRef:
+			  kind: ClusterRole
+			  name: ns-reader-role
+			  apiGroup: rbac.authorization.k8s.io`,
+		}
+		if _, err := NewNsWatch(conf); err != nil {
+			t.Fatalf("error creating watch: %v", err)
+		}
+	})
+
+	t.Run("with valid config using yaml", func(t *testing.T) {
+		w, err := NewNsWatch(conf)
+		if err != nil {
+			t.Fatalf("error creating watch: %v", err)
+		}
+		defer w.Stop()
+		go func() {
+			if err := w.Start(); err != nil {
+				panic(err)
+			}
+		}()
+		time.Sleep(5 * time.Second)
 	})
 }

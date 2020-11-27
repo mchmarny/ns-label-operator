@@ -103,8 +103,13 @@ type NsWatch struct {
 	stopCh      chan struct{}
 }
 
-// Run starts NsWatch by attaching namespace event handler. This method blocks until either an internal error or the Stop() method is invoked.
-func (w *NsWatch) Run() error {
+// GetFileManager returns the active file manager used by this watch. All objects created by NsWatch are associated with this file manager.
+func (w *NsWatch) GetFileManager() string {
+	return w.fileManager
+}
+
+// Start starts NsWatch by attaching namespace event handler. This method blocks until either an internal error or the Stop() method is invoked.
+func (w *NsWatch) Start() error {
 	w.logger.Infof("starting %s for label: %s", operatorName, w.label)
 	factory := informers.NewSharedInformerFactory(w.client, 0) // 0 == don't sync
 	informer := factory.Core().V1().Namespaces().Informer()

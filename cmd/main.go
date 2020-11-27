@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("error initializing watch: %v", err)
 	}
 
-	if err := nsw.Run(); err != nil {
+	if err := nsw.Start(); err != nil {
 		log.Fatalf("error running watch: %v", err)
 	}
 }
