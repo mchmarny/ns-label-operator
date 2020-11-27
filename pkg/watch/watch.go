@@ -76,7 +76,7 @@ func NewNsWatch(c Config) (*NsWatch, error) {
 	}
 
 	if c.ManifestDir != "" {
-		c.Logger.Debugf("loading manifests from: %s", c.ManifestDir)
+		c.Logger.Debugf("loading manifests from directory: %s", c.ManifestDir)
 		files, err := getFiles(c.ManifestDir, "*.yaml")
 		if err != nil {
 			return nil, errors.Wrapf(err, "error listing files from: %s", c.ManifestDir)
@@ -105,7 +105,7 @@ type NsWatch struct {
 
 // Run starts NsWatch by attaching namespace event handler. This method blocks until either an internal error or the Stop() method is invoked.
 func (w *NsWatch) Run() error {
-	w.logger.Infof("starting %s for %s label", operatorName, w.label)
+	w.logger.Infof("starting %s for label: %s", operatorName, w.label)
 	factory := informers.NewSharedInformerFactory(w.client, 0) // 0 == don't sync
 	informer := factory.Core().V1().Namespaces().Informer()
 	w.stopCh = make(chan struct{})
