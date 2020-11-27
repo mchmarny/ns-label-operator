@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"fmt"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -8,7 +9,7 @@ import (
 
 func getNS(active bool, labels map[string]string) *corev1.Namespace {
 	ns := &corev1.Namespace{}
-	ns.SetName("test")
+	ns.SetName(fmt.Sprintf("%s-test", operatorName))
 	ns.SetLabels(labels)
 
 	if active {
