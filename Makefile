@@ -5,6 +5,12 @@ IMAGE_OWNER  ?=$(shell git config --get user.username)
 .PHONY: all
 all: help
 
+.PHONY: setup
+setup: ## Sets up k8s cluster for tests 
+	kubectl cluster-info
+	kubectl get ns
+	kubectl create ns ns-label-operator-test
+
 .PHONY: tidy
 tidy: ## Updates the go modules and vendors all dependencies 
 	go mod tidy
