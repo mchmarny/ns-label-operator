@@ -117,18 +117,19 @@ import "github.com/mchmarny/ns-label-operator/pkg/watch"
 Than create an instance of `NsWatch`:
 
 ```go
-w, err := watch.NewNsWatch(logger, label, configPath, dirPath)
-if err != nil {
-    log.Fatalf("error initializing watch: %v", err)
-}
+nsw, err := watch.NewNsWatch(watch.Config{
+    Label:       label,
+    ConfigFile:  configPath,
+    ManifestDir: dirPath,
+    Logger:      logger,
+})
+handleErr(err)
 ```
 
-And finally run it: 
-
-> Note, `Run()` run will block while running. 
+And then run it to start watching and apply specified YAML when specific label is applied to namespace. The `Run()` method will block until either an internal error occurs or the `Stop()` method is called on the same `NsWatch`.
 
 ```go
-if err := w.Run(); err != nil {
+if err := nsw.Run(); err != nil {
     log.Fatalf("error running watch: %v", err)
 }
 ```
