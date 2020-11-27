@@ -36,7 +36,7 @@ kubectl create cm trigger-config \
 Apply the deployment:
 
 ```shell
-kubectl apply -f deployments/deployment.yaml
+kubectl apply -f deployments
 ```
 
 Check on the deployment status:
@@ -61,12 +61,18 @@ kubectl logs -f -l app=ns-label-operator -n ns-watcher
 On successfully deployment, it should include something like this: 
 
 ```json
-{"level":"info","msg":"starting ns-label-operator","time":"2020-11-26T19:35:14Z"}
-{"level":"info","msg":"using cluster config","time":"2020-11-26T19:35:14Z"}
-{"level":"info","msg":"loading manifests from: /config","time":"2020-11-26T19:35:14Z"}
-{"level":"info","msg":"parsing /config/exporter.yaml file","time":"2020-11-26T19:35:14Z"}
-{"level":"info","msg":"parsing /config/role.yaml file","time":"2020-11-26T19:35:14Z"}
-{"level":"info","msg":"found 3 YAML manifest(s) from 2 file(s)","time":"2020-11-26T19:35:14Z"}
+{
+    "level": "debug",
+    "msg": "using cluster config"
+}
+{
+    "level": "debug",
+    "msg": "loading manifests from: /config"
+}
+{
+    "level": "info",
+    "msg": "starting ns-label-operator for dapr-enabled label"
+}
 ```
 
 ## test
@@ -139,7 +145,7 @@ if err := nsw.Run(); err != nil {
 To delete the entire deployment:
 
 ```shell
-kubectl delete -f deployments/deployment.yaml
+kubectl delete -f deployments
 kubectl delete ns ns-watcher
 ```
 

@@ -25,10 +25,7 @@ func main() {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 	if logJSON {
-		logger.SetFormatter(&logrus.JSONFormatter{
-			DisableTimestamp: true,
-			PrettyPrint:      true,
-		})
+		logger.SetFormatter(&logrus.JSONFormatter{})
 	}
 
 	nsw, err := watch.NewNsWatch(watch.Config{
