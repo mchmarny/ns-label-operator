@@ -135,9 +135,8 @@ Than create an instance of `NsWatch`. The `Config` object used to initialize `Ne
 
 ```go
 nsw, err := watch.NewNsWatch(watch.Config{
-    Label:      "demo-role", // label to watch for
-    Manifests:  []string{
-			`apiVersion: rbac.authorization.k8s.io/v1
+    Label:     "demo-role", // label to watch for
+    Manifests: []string{`apiVersion: rbac.authorization.k8s.io/v1
 			kind: Role
 			metadata:
 			  name: secret-reader
@@ -145,7 +144,7 @@ nsw, err := watch.NewNsWatch(watch.Config{
 			- apiGroups: [""]
 			  resources: ["secrets"]
 			  verbs: ["get"]`,
-	}, // YAML to apply when "demo-role" is created
+	}, // YAML to apply in the namespace where the the specified label is applied
 })
 ```
 
