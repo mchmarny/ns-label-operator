@@ -1,4 +1,4 @@
-APP_VERSION  ?=v0.4.4
+APP_VERSION  ?=v0.4.5
 APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 
@@ -26,7 +26,6 @@ run: ## Runs compiled code
 .PHONY: image
 image: tidy ## Builds and publish image 
 	docker build \
-		-f build/Dockerfile \
 		-t ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION) .
 	docker push ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION)
 

@@ -60,7 +60,7 @@ jobs:
       uses: docker/build-push-action@v1
       with:
         context: .
-        file: ./build/Dockerfile
+        file: ./Dockerfile
         username: ${{ github.actor }}
         password: ${{ secrets.OPS_TOKEN }}
         registry: ghcr.io
