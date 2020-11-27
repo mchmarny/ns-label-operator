@@ -26,8 +26,7 @@ func (w *NsWatch) apply(ns *corev1.Namespace) error {
 	ctx := context.Background()
 	for i, y := range w.manifests {
 		if err := w.applyManifest(ctx, ns, y); err != nil {
-			w.logger.Errorf("error applying yaml (%s): %v", y, err)
-			continue
+			return errors.Wrapf(err, "error applying yaml (%s)", y)
 		}
 		w.logger.Debugf("file %d applied successfully", i)
 	}

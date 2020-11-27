@@ -67,25 +67,24 @@ func TestNsWatch(t *testing.T) {
 		conf.ManifestDir = ""
 		conf.Manifests = []string{
 			`apiVersion: rbac.authorization.k8s.io/v1
-			kind: Role
-			metadata:
-			  name: secret-reader
-			rules:
-			- apiGroups: [""]
-			  resources: ["secrets"]
-			  verbs: ["get"]`,
-			`kind: ClusterRoleBinding
-			apiVersion: rbac.authorization.k8s.io/v1
-			metadata:
-			  name: ns-reader-cluster-binding
-			subjects:
-			- kind: ServiceAccount
-			  name: ns-watcher-account
-			  namespace: ns-watcher
-			roleRef:
-			  kind: ClusterRole
-			  name: ns-reader-role
-			  apiGroup: rbac.authorization.k8s.io`,
+kind: Role
+metadata:
+  name: secret-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]`,
+			`apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dapr-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: default
+roleRef:
+  kind: Role
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io`,
 		}
 		if _, err := NewNsWatch(conf); err != nil {
 			t.Fatalf("error creating watch: %v", err)
@@ -104,5 +103,9 @@ func TestNsWatch(t *testing.T) {
 			}
 		}()
 		time.Sleep(5 * time.Second)
+		ns := getNS(true, map[string]string{})
+		if err := w.apply(ns); err != nil {
+			t.Fatalf("error applying test manifest: %v", err)
+		}
 	})
 }

@@ -42,6 +42,7 @@ jobs:
       run: |
         kubectl cluster-info
         kubectl get pods -n kube-system
+        kubectl create ns ns-label-operator-test
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
         go test -race -coverprofile=coverage.txt -covermode=atomic ./...

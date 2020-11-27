@@ -103,6 +103,11 @@ type NsWatch struct {
 	stopCh      chan struct{}
 }
 
+// GetLabel returns the configured label for which the watch is monitoring
+func (w *NsWatch) GetLabel() string {
+	return w.label
+}
+
 // GetFileManager returns the active file manager used by this watch. All objects created by NsWatch are associated with this file manager.
 func (w *NsWatch) GetFileManager() string {
 	return w.fileManager
