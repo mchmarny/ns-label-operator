@@ -18,6 +18,9 @@ coverage.txt
 # vendored deps
 vendor
 
+# binary 
+bin
+
 # docs 
 golang.org
 

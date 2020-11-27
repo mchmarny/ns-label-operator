@@ -1,4 +1,4 @@
-APP_VERSION  ?=v0.2.10
+APP_VERSION  ?=v0.3.1
 APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 
@@ -14,14 +14,20 @@ tidy: ## Updates the go modules and vendors all dependencies
 test: tidy ## Tests the entire project 
 	go test -v -count=1 -race ./...
 
+.PHONY: build
+build: tidy ## build code
+	go build -mod vendor -o ./bin/$(APP_ID) ./cmd/.
+
 .PHONY: run
-run: tidy ## Runs uncompiled code
-	KUBECONFIG=~/.kube/config DEBUG=true CONFIG_DIR=manifests \
-		go run cmd.go handler.go main.go
+run: ## Runs compiled code
+	KUBECONFIG=~/.kube/config DEBUG=true CONFIG_DIR=manifests TRIGGER_LABEL=dapr-enabled \
+	./bin/$(APP_ID)
 
 .PHONY: image
 image: tidy ## Builds and publish image 
-	docker build -t ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION) .
+	docker build \
+		-f build/Dockerfile \
+		-t ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION) .
 	docker push ghcr.io/$(IMAGE_OWNER)/$(APP_ID):$(APP_VERSION)
 
 .PHONY: lint

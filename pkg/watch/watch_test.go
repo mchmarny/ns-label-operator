@@ -1,4 +1,4 @@
-package main
+package watch
 
 import (
 	"os"
@@ -17,7 +17,7 @@ func getLocalConfigPath() (string, error) {
 	return path.Join(usr.HomeDir, ".kube/config"), nil
 }
 
-func TestCmd(t *testing.T) {
+func TestWatch(t *testing.T) {
 	f, err := getLocalConfigPath()
 	if err != nil {
 		t.Fatalf("error getting config path: %v", err)
@@ -28,17 +28,7 @@ func TestCmd(t *testing.T) {
 		t.SkipNow() // TODO: kube config in hithub action
 	}
 
-	cfg, err := getConfig(f)
-	if err != nil {
-		t.Fatalf("error loading config: %v", err)
-	}
-
-	trigger = &triggerCmd{
-		cfg:    cfg,
-		logger: getLogger(true, true),
-	}
-
-	if err := trigger.init("./manifests"); err != nil {
-		t.Fatalf("error on init: %v", err)
+	if _, err := NewNsWatch(nil, "dapr-enabled", f, "../../manifests"); err != nil {
+		t.Fatalf("error creating watch: %v", err)
 	}
 }
