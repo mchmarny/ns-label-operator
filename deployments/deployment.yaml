@@ -56,9 +56,11 @@ spec:
               name: trigger-label
               key: label
         - name: DEBUG
-          value: "false"
+          value: "true"
         - name: LOG_TO_JSON
           value: "true"
+        - name: CONFIG_DIR
+          value: "/config"
         volumeMounts:
         - name: "config"
           mountPath: "/config"
