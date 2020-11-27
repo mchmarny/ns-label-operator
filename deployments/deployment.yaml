@@ -48,7 +48,7 @@ spec:
       serviceAccountName: ns-watcher-account
       containers:
       - name: watch
-        image: ghcr.io/mchmarny/ns-label-operator:v0.4.2
+        image: ghcr.io/mchmarny/ns-label-operator:v0.4.3
         env:
         - name: TRIGGER_LABEL
           valueFrom:

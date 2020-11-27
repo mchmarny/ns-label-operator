@@ -1,0 +1,69 @@
+name: Image on tag
+
+on:
+  push:
+    tags:
+      - 'v*' # v0.1.1
+
+env:
+  APP_NAME: ns-label-operator
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Setup
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Tidy
+      run: |
+        go mod tidy 
+        go mod vendor
+
+    - name: Kind
+      uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.9.0"
+
+    - name: Test
+      run: |
+        kubectl cluster-info
+        kubectl get pods -n kube-system
+        echo "current-context:" $(kubectl config current-context)
+        echo "environment-kubeconfig:" ${KUBECONFIG}
+        go test -v -count=1 -race ./...
+
+    - name: Variables
+      run: |
+        echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Info
+      run: |
+        echo "::debug::RELEASE_VERSION=${{ env.RELEASE_VERSION }}"
+
+    - name: Publish
+      uses: docker/build-push-action@v1
+      with:
+        context: .
+        file: ./Dockerfile
+        username: ${{ github.actor }}
+        password: ${{ secrets.OPS_TOKEN }}
+        registry: ghcr.io
+        push: true
+        tags: ${{ env.RELEASE_VERSION }},latest
+        
