@@ -1,4 +1,4 @@
-APP_VERSION  ?=v0.4.9
+APP_VERSION  ?=v0.4.10
 APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 

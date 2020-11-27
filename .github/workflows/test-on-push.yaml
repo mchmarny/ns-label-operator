@@ -1,7 +1,7 @@
 name: Test
 
 on:
-  push:
+  pull_request:
 
 env:
   APP_NAME: ns-label-operator
