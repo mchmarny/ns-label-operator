@@ -4,7 +4,13 @@
 
 Watches Kubernetes namespaces and applies pre-configured YAML when specific label is applied to a namespace. Helpful in configuring common roles, trace forwarders, or any other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 
-## config 
+## Install using Helm Chart 
+
+The instructions how to install the `ns-label-operator` using Helm chart are located [here](./chart)
+
+## Install Manually
+
+### Config
 
 Create the `ns-watcher` namespace:
 
@@ -31,7 +37,7 @@ kubectl create cm trigger-config \
     -n ns-watcher
 ```
 
-## deployment 
+### Deployment 
 
 Apply the deployment:
 
@@ -70,7 +76,7 @@ On successfully deployment, it should include something like this:
 
 Now, try testing it.
 
-## test
+### Demo
 
 > Assumes namespace named `demo1` and the label to trigger on when `true` is `dapr-enabled`
 
@@ -123,7 +129,7 @@ kubectl get all,Roles,RoleBindings -n demo1
 kubectl label ns test1 dapr-enabled-
 ```
 
-## library 
+### Use `ns-label-operator` as a library  
 
 To use `ns-label-operator` as a library, first import it:
 
@@ -165,7 +171,7 @@ if err := nsw.Start(); err != nil {
 }
 ```
 
-## cleanup 
+### cleanup 
 
 To delete the entire deployment:
 
