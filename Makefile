@@ -1,4 +1,4 @@
-APP_VERSION  ?=v0.4.11
+APP_VERSION  ?=v0.4.12
 APP_ID       ?=ns-label-operator
 IMAGE_OWNER  ?=$(shell git config --get user.username)
 
@@ -22,7 +22,7 @@ test: tidy ## Tests the entire project
 
 .PHONY: testcover
 testcover: ## Tests coverage configuration 
-	curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+	curl --data-binary @.codecov.yml https://codecov.io/validate
 
 .PHONY: build
 build: tidy ## build code
