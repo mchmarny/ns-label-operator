@@ -1,0 +1,28 @@
+# For more configuration details:
+# https://docs.codecov.io/docs/codecov-yaml
+
+# Validate this file using curl
+# curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+
+# Coverage configuration
+# ----------------------
+coverage:
+  status:
+    patch: false
+
+  range: 40..60
+  round: up
+  precision: 2
+
+# Ignoring Paths
+# --------------
+# which folders/files to ignore
+ignore:
+  - cmd/*
+
+# Pull request comments:
+# ----------------------
+# Diff is the Coverage Diff of the pull request
+# Files are the files impacted by the pull request
+comment:
+  layout: diff, files

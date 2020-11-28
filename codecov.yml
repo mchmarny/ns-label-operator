@@ -1,9 +1,0 @@
-coverage:
-  status:
-    patch: off
-    project:
-      default:
-        target: auto
-        threshold: 3%
-ignore:
-  - "cmd" 
