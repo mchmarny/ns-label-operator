@@ -42,6 +42,12 @@ func TestNsWatch(t *testing.T) {
 
 	conf := Config{}
 
+	t.Run("with non existing directory", func(t *testing.T) {
+		if _, err := getFiles("bad-dir", "*.yaml"); err == nil {
+			t.Fatal()
+		}
+	})
+
 	t.Run("with empty config", func(t *testing.T) {
 		if _, err := NewNsWatch(conf); err == nil {
 			t.Fatal()
