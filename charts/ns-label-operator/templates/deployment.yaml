@@ -38,4 +38,4 @@ spec:
       volumes:
         - name: "config"
           configMap:
-            name: trigger-config-{{ .Release.Name }}
+            name: {{ .Values.manifestConfigMap }}

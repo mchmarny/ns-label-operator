@@ -70,7 +70,7 @@ helm: ## Install Helm chart
 		--set debug=true \
 		--set logAsJson=false \
 		--set triggerLabel=trace-export-enabled \
-		--include-dir conf=.manifests/*.yaml
+		--set manifestConfigMap=trace-exporter-config
 
 .PHONY: helm-clean
 helm-clean: ## Uninstall Helm chart
