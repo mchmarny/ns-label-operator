@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    app-type: "ns-label-operator"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        app-type: "ns-label-operator"
+    spec:
+      restartPolicy: Always
+      serviceAccountName: ns-watcher-account
+      containers:
+      - name: ns-label-operator
+        image: "{{ .Values.image.registry }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: TRIGGER_LABEL
+          value: "{{ .Values.triggerLabel }}"
+        - name: DEBUG
+          value: "{{ .Values.debug }}"
+        - name: LOG_TO_JSON
+          value: "{{ .Values.logAsJson }}"
+        - name: CONFIG_DIR
+          value: "/config"
+        volumeMounts:
+        - name: "config"
+          mountPath: "/config"
+      volumes:
+        - name: "config"
+          configMap:
+            name: {{ .Values.manifestConfigMap }}

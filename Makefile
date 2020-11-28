@@ -58,9 +58,23 @@ spell: ## Checks spelling across the entire project
 	misspell -locale="US" -error -source="text" pkg/**
 	misspell -locale="US" -error -source="text" *.md
 
+.PHONY: tag
 tag: ## Creates release tag 
 	git tag $(APP_VERSION)
 	git push origin $(APP_VERSION)
+
+.PHONY: helm
+helm: ## Install Helm chart
+	helm install trace-exporter chart/ \
+		-n dev \
+		--set debug=true \
+		--set logAsJson=false \
+		--set triggerLabel=trace-export-enabled \
+		--set manifestConfigMap=trace-exporter-config
+
+.PHONY: helm-clean
+helm-clean: ## Uninstall Helm chart
+	helm uninstall trace-exporter -n dev
 
 .PHONY: clean
 clean: ## Cleans up generated files 
