@@ -40,7 +40,7 @@ For more details on initializing Helm, [read the Helm docs](https://helm.sh/docs
 1. Add the helm repo
 
 ```shell
-helm repo add ns-label-operator https://github.com/mchmarny/helm-charts/
+helm repo add ns-label-operator https://charts.chmarny.dev
 helm repo update
 ```
 

@@ -76,6 +76,10 @@ helm: ## Install Helm chart
 helm-clean: ## Uninstall Helm chart
 	helm uninstall trace-exporter -n dev
 
+.PHONY: chart
+chart: ## Package Helm chart
+	helm package chart/
+
 .PHONY: clean
 clean: ## Cleans up generated files 
 	go clean
