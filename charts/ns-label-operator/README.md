@@ -1,4 +1,6 @@
-# Introduction
+# WIP: Introduction
+
+> This Helm chart is not ready for use yet, please use the manual deployment steps outlines in the [Readme](../) in the root of the repo.
 
 This chart deploys `ns-label-operator` into Kubernetes cluster using the Helm package manager.
 
@@ -38,7 +40,7 @@ For more details on initializing Helm, [read the Helm docs](https://helm.sh/docs
 1. Add the helm repo
 
 ```shell
-helm repo add ns-label-operator https://github.com/mchmarny/ns-label-operator/charts
+helm repo add ns-label-operator https://github.com/mchmarny/helm-charts/
 helm repo update
 ```
 
