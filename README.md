@@ -4,181 +4,55 @@
 
 Watches Kubernetes namespaces and applies pre-configured YAML when specific label is applied to a namespace. Helpful in configuring common roles, trace forwarders, or any other common settings on a new namespace (e.g. Dapr.io role, role binding, and trace exporter).
 
-## Install using Helm Chart 
+## Installation Options
 
-The instructions how to install the `ns-label-operator` using Helm chart are located [here](./chart)
+* [Install using Helm Chart](./MANUAL.md)
+* [Install manually](./chart)
+* [use as a library in your project](./LIBRARY.md)
 
-## Install Manually
+## Usage
 
-### Config
+To illustrate the usage, let's assume you want to apply custom trace export configuration to any namespace in your cluster that's labeled with the `trace-export-enabled=true` label. 
 
-Create the `ns-watcher` namespace:
+To start, create a ConfigMap to hold all the deployments (YAML files) that you need to create the necessary configuration:
 
-```shell
-kubectl create ns ns-watcher
-```
-
-Next, create `trigger-label` config map with the name of the namespace label for which you want watch.
+> This example uses `default` namespace but you can deploy the `ns-label-operator` to any existing namespace in your cluster.
 
 ```shell
-kubectl create cm trigger-label \
-    --from-literal label=dapr-enabled \
-    -n ns-watcher
+kubectl create cm trace-exporter-config \
+    --from-file deployments/role.yaml \
+    --from-file deployments/exporter.yaml \
+    -n default
 ```
 
-Next, create `trigger-config` config map with the content you want to execute when the specific label is applied to a namespace.
+Then deploy the `ns-label-operator` into your cluster to start monitoring for specific label:
 
-> You can load multiple files and each file can include multiple YAML blocks. See [role.yaml](manifests/role.yaml) for example. The files must have `*.yaml` extension for the operator to read them.
+> This example uses Helm chart, See [Installation Options](#installation-options) for other ways to use `ns-label-operator`
 
 ```shell
-kubectl create cm trigger-config \
-    --from-file manifests/role.yaml \
-    --from-file manifests/exporter.yaml \
-    -n ns-watcher
+helm install trace-exporter-operator ns-label-operator/ns-label-operator \
+  --set triggerLabel=trace-export-enabled \
+  --set manifestConfigMap=trace-exporter-config \
+  -n default
 ```
 
-### Deployment 
+> Make sure that the ConfigMap and `ns-label-operator` are deployed into the same namespace.
 
-Apply the deployment:
+Now whenever someone labels namespace in your cluster with with the `trace-export-enabled` label: 
 
 ```shell
-kubectl apply -f deployments
+kubectl label ns example-namespace trace-export-enabled=true
 ```
 
-Check on the deployment status:
+All the files loaded into the `trace-exporter-config` ConfigMap will be applied in that namespace.
 
-```shell
-kubectl get pods -n ns-watcher
-```
 
-The result should look something like this: 
-
-```shell
-NAME                                 READY   STATUS    RESTARTS   AGE
-ns-label-operator-67d47c58b6-46vx6   1/1     Running   0          12s
-```
-
-Also, check the `ns-label-operator` logs: 
-
-```shell
-kubectl logs -f -l app=ns-label-operator -n ns-watcher
-```
-
-On successfully deployment, it should include something like this: 
-
-```json
-{
-    "level":"info",
-    "msg":"starting ns-label-operator for label: dapr-enabled",
-    "time":"2020-11-27T06:59:39-08:00"
-}
-```
-
-Now, try testing it.
-
-### Demo
-
-> Assumes namespace named `demo1` and the label to trigger on when `true` is `dapr-enabled`
-
-In a separate terminal now, create a namespace:
-
-```shell
-kubectl create ns demo1
-```
-
-Label and now label that namespace:
-
-```shell
-kubectl label ns demo1 dapr-enabled=true
-```
-
-The log you followed in the deployment should now also include the 3 entries, one for each YAML manifest loaded from the 2 files in [manifests](./manifests) directory:
-
-```json
-{
-    "level":"info",
-    "msg":"name:zipkin, ns:demo8 kind:Component.dapr.io, version:v1alpha1",
-    "time":"2020-11-27T07:01:10-08:00"
-}
-{
-    "level":"info",
-    "msg":"name:secret-reader, ns:demo8 kind:Role.rbac.authorization.k8s.io, version:v1",
-    "time":"2020-11-27T07:01:10-08:00"
-}
-{
-    "level":"info",
-    "msg":"name:dapr-secret-reader, ns:demo8 kind:RoleBinding.rbac.authorization.k8s.io, version:v1",
-    "time":"2020-11-27T07:01:10-08:00"
-}
-{
-    "level":"info",
-    "msg":"trigger:dapr-enabled applied on namespace:demo8",
-    "time":"2020-11-27T07:01:10-08:00"
-}
-```
-
-You can also check on the changes made in the namespace:
-
-```shell
-kubectl get all,Roles,RoleBindings -n demo1
-```
-
-> Note, you can remove trigger label but that's just prevents the trigger from firming again on that namespace, it does not undo the already created resources
+> Note, you can remove trigger label to prevent the trigger from firming again on that namespace but that will not undo the already created resources.
 
 ```shell
 kubectl label ns test1 dapr-enabled-
 ```
 
-### Use `ns-label-operator` as a library  
-
-To use `ns-label-operator` as a library, first import it:
-
-```go
-import "github.com/mchmarny/ns-label-operator/pkg/watch"
-```
-
-Than create an instance of `NsWatch`. The `Config` object used to initialize `NewNsWatch` has more config options. The two main are the label name and either an array of YAML string or a path to the directory with YAML files. To use a YAML string you need to populate the `Manifests` array:
-
-```go
-nsw, err := watch.NewNsWatch(watch.Config{
-    Label:     "demo-role", // label to watch for
-    Manifests: []string{`apiVersion: rbac.authorization.k8s.io/v1
-			kind: Role
-			metadata:
-			  name: secret-reader
-			rules:
-			- apiGroups: [""]
-			  resources: ["secrets"]
-			  verbs: ["get"]`,
-	}, // YAML to apply in the namespace where the the specified label is applied
-})
-```
-
-You can also create an instance of `NsWatch` using dir path. All YAML files (`*.yaml`) in that directory will automatically parsed in.
-
-```go
-nsw, err := watch.NewNsWatch(watch.Config{
-    Label:       "demo-role", // label to watch for
-    ManifestDir: "./manifests", // path to the dir with YAML files
-})
-```
-
-And then run it to start watching and apply specified YAML when specific label is applied to namespace. The `Start()` method will block until either an internal error occurs or the `Stop()` method is called on the same instance of `NsWatch`.
-
-```go
-if err := nsw.Start(); err != nil {
-    log.Fatalf("error running watch: %v", err)
-}
-```
-
-### cleanup 
-
-To delete the entire deployment:
-
-```shell
-kubectl delete -f deployments
-kubectl delete ns ns-watcher
-```
 
 ## Disclaimer
 

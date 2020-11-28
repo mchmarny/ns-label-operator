@@ -47,6 +47,8 @@ helm install <name> ns-label-operator/ns-label-operator \
 
 > Set the `manifestConfigMap` to the name of ConfigMap created above. `triggerLabel` is the name of the label which should trigger the deployment. 
 
+See the [Usage section](../README.md#usage) for instructions on how to use `ns-label-operator` to apply custom deployments when any namespace in your cluster is labeled with specific label. 
+
 ## Verify installation
 
 Once the chart is installed, verify the `ns-label-operator` pod is running in the target namespace:
@@ -74,41 +76,6 @@ The `ns-label-operator` Helm chart has the follow configuration options:
 | `triggerLabel`         | The name of the label to monitor          | ``          |
 | `manifestConfigMap`    | Name of the ConfigMap holding deployments | ``          |
 
-## Example 
-
-To apply trace exporter configuration stored in ConfigMap named `trace-exporter-config` to any namespace labeled with `trace-export-enabled=true`, start by first creating a ConfigMap to hold the deployments (YAML files) that create the necessary configuration:
-
-> This example uses `default` namespace but you can you use any other existing namespace of your choosing. 
-
-```shell
-kubectl create cm trace-exporter-config \
-    --from-file ../manifests/role.yaml \
-    --from-file ../manifests/exporter.yaml \
-    -n default
-```
-
-Then deploy the Helm chart to start monitoring the cluster for specific label:
-
-```shell
-helm install trace-exporter-operator ns-label-operator/ns-label-operator \
-  --set triggerLabel=trace-export-enabled \
-  --set manifestConfigMap=trace-exporter-config \
-  -n default
-```
-
-You can check on the deployment logs: 
-
-```shell
-kubectl logs -l app=trace-exporter-operator -n default
-```
-
-Now whenever you label a namespace with the `trace-export-enabled` label: 
-
-```shell
-kubectl label ns example-namespace trace-export-enabled=true
-```
-
-All the files loaded into the `trace-exporter-config` will be applied in that namespace.
 
 ## Disclaimer
 
