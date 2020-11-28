@@ -47,7 +47,10 @@ jobs:
         kubectl create ns ns-label-operator-test
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
-        go test -v -count=1 -race ./...
+        go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    - name: Cover
+      uses: codecov/codecov-action@v1
 
     - name: Variables
       run: |
