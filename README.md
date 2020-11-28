@@ -6,8 +6,8 @@ Watches Kubernetes namespaces and applies pre-configured YAML when specific labe
 
 ## Installation Options
 
-* [Install using Helm Chart](./MANUAL.md)
-* [Install manually](./chart)
+* [Install using Helm Chart](./chart)
+* [Install manually](./MANUAL.md)
 * [use as a library in your project](./LIBRARY.md)
 
 ## Usage
