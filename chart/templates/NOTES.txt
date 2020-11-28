@@ -1,0 +1,6 @@
+Thank you for installing {{ .Chart.Name }}, {{ .Chart.Description }}.
+
+Your deployment: 
+  - name: {{ .Release.Name }}
+  - namespace: {{ .Release.Namespace }}
+  - monitored label: {{ .Values.triggerLabel }}

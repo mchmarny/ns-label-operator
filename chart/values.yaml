@@ -1,0 +1,14 @@
+
+debug: false
+logAsJson: true
+
+image:
+  registry: ghcr.io/mchmarny/ns-label-operator
+  tag: v0.4.12
+  pullPolicy: IfNotPresent
+
+triggerLabel: ""
+manifest: ""
+
+nameOverride: ""
+fullnameOverride: ""

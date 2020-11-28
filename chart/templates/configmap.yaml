@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trigger-config-{{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+data:
+  # waiting for Helm to add support for --include-dir conf=.manifests/*.yaml
+  {{- (.Files.Glob "conf/").AsConfig | nindent 2 }}
