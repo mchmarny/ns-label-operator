@@ -20,6 +20,10 @@ tidy: ## Updates the go modules and vendors all dependencies
 test: tidy ## Tests the entire project 
 	go test -v -count=1 -race -coverprofile=coverage.txt -covermode=atomic ./...
 
+.PHONY: testcover
+testcover: ## Tests coverage configuration 
+	curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+
 .PHONY: build
 build: tidy ## build code
 	go build -mod vendor -o ./bin/$(APP_ID) ./cmd/.
