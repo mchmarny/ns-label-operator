@@ -12,7 +12,7 @@ Next, create `trigger-label` config map with the name of the namespace label for
 
 ```shell
 kubectl create cm trigger-label \
-    --from-literal label=dapr-enabled \
+    --from-literal label=dapr-demo \
     -n ns-watcher
 ```
 
@@ -21,7 +21,7 @@ Next, create `trigger-config` config map with the content you want to execute wh
 > You can load multiple files and each file can include multiple YAML blocks. See [role.yaml](manifests/role.yaml) for example. The files must have `*.yaml` extension for the operator to read them.
 
 ```shell
-kubectl create cm trigger-config \
+kubectl create secret generic demo-ns-config \
     --from-file manifests/role.yaml \
     --from-file manifests/exporter.yaml \
     -n ns-watcher

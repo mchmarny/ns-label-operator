@@ -12,16 +12,16 @@ Watches Kubernetes namespaces and applies pre-configured YAML when specific labe
 
 ## Usage
 
-To illustrate the usage, let's assume you want to apply custom trace export configuration to any namespace in your cluster that's labeled with the `trace-export-enabled=true` label. 
+To illustrate the usage, let's assume you want to apply custom trace export configuration to any namespace in your cluster that's labeled with the `dapr-demo=true` label. 
 
 To start, create a ConfigMap to hold all the deployments (YAML files) that you need to create the necessary configuration:
 
 > This example uses `default` namespace but you can deploy the `ns-label-operator` to any existing namespace in your cluster.
 
 ```shell
-kubectl create cm trace-exporter-config \
-    --from-file deployments/role.yaml \
-    --from-file deployments/exporter.yaml \
+kubectl create secret generic demo-ns-config \
+    --from-file manifests/role.yaml \
+    --from-file manifests/exporter.yaml \
     -n default
 ```
 
@@ -30,21 +30,21 @@ Then deploy the `ns-label-operator` into your cluster to start monitoring for sp
 > This example uses Helm chart, See [Installation Options](#installation-options) for other ways to use `ns-label-operator`
 
 ```shell
-helm install trace-exporter-operator ns-label-operator/ns-label-operator \
-  --set triggerLabel=trace-export-enabled \
-  --set manifestConfigMap=trace-exporter-config \
+helm install dapr-demo-operator ns-label-operator/ns-label-operator \
+  --set triggerLabel=dapr-demo \
+  --set manifestConfigMap=demo-ns-config \
   -n default
 ```
 
 > Make sure that the ConfigMap and `ns-label-operator` are deployed into the same namespace.
 
-Now whenever someone labels namespace in your cluster with with the `trace-export-enabled` label: 
+Now whenever someone labels namespace in your cluster with with the `dapr-demo` label: 
 
 ```shell
-kubectl label ns example-namespace trace-export-enabled=true
+kubectl label ns example-namespace dapr-demo=true
 ```
 
-All the files loaded into the `trace-exporter-config` ConfigMap will be applied in that namespace.
+All the files loaded into the `demo-ns-config` ConfigMap will be applied in that namespace.
 
 
 > Note, you can remove trigger label to prevent the trigger from firming again on that namespace but that will not undo the already created resources.
@@ -53,6 +53,12 @@ All the files loaded into the `trace-exporter-config` ConfigMap will be applied 
 kubectl label ns test1 dapr-enabled-
 ```
 
+## Cleanup 
+
+```shell
+kubectl delete secret demo-ns-config
+helm uninstall dapr-demo-operator
+```
 
 ## Disclaimer
 
