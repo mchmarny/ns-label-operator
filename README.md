@@ -50,7 +50,7 @@ All the files loaded into the `demo-ns-config` ConfigMap will be applied in that
 > Note, you can remove trigger label to prevent the trigger from firming again on that namespace but that will not undo the already created resources.
 
 ```shell
-kubectl label ns test1 dapr-enabled-
+kubectl label ns example-namespace dapr-demo-
 ```
 
 ## Cleanup 
