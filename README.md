@@ -25,7 +25,14 @@ kubectl create secret generic demo-ns-config \
     -n default
 ```
 
-Then deploy the `ns-label-operator` into your cluster to start monitoring for specific label:
+Next, add the Helm repo:
+
+```shell
+helm repo add ns-label-operator https://charts.chmarny.dev
+helm repo update
+```
+
+Then, deploy the `ns-label-operator` into your cluster to start monitoring for specific label:
 
 > This example uses Helm chart, See [Installation Options](#installation-options) for other ways to use `ns-label-operator`
 
