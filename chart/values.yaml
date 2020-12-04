@@ -4,7 +4,7 @@ logAsJson: true
 
 image:
   registry: ghcr.io/mchmarny/ns-label-operator
-  tag: v0.4.12
+  tag: v0.4.13
   pullPolicy: IfNotPresent
 
 triggerLabel: ""
